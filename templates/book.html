@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Book Appointment</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="brand">
+            <span class="brand-logo">G</span>
+            Guidance Office
+        </div>
+
+        <div class="nav-right">
+
+            <a href="{{ url_for('student_dashboard') }}">
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container small-container">
+
+        <div class="form-card">
+
+            <h1>Book an Appointment</h1>
+
+            <p>
+                Fill out the form below to request a guidance appointment.
+            </p>
+
+
+            <form method="POST">
+
+                <label>Appointment Date</label>
+
+                <input type="date" name="date" required>
+
+
+                <label>Appointment Time</label>
+
+                <input type="time" name="time" required>
+
+
+                <label>Reason for Appointment</label>
+
+                <textarea name="reason" rows="5" placeholder="Explain the reason for your appointment..."
+                    required></textarea>
+
+
+                <div class="form-buttons">
+
+                    <a href="{{ url_for('student_dashboard') }}" class="btn secondary">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn primary">
+                        Submit Request
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

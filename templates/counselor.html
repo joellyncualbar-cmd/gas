@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Counselor Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="brand">
+            <span class="brand-logo">G</span>
+            Guidance Office
+        </div>
+
+        <div class="nav-right">
+
+            <span>
+                {{ session["name"] }}
+            </span>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="welcome">
+
+            <h1>Counselor Dashboard</h1>
+
+            <p>
+                Manage student appointment requests.
+            </p>
+
+        </div>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% for category, message in messages %}
+
+        <div class="alert {{ category }}">
+            {{ message }}
+        </div>
+
+        {% endfor %}
+
+        {% endwith %}
+
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>Appointment Requests</h2>
+
+                    <p>
+                        Review and manage student appointments.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% if appointments %}
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for appointment in appointments %}
+
+                        <tr>
+
+                            <td>
+                                {{ appointment["student_name"] }}
+                            </td>
+
+                            <td>
+                                {{ appointment["date"] }}
+                            </td>
+
+                            <td>
+                                {{ appointment["time"] }}
+                            </td>
+
+                            <td>
+                                {{ appointment["reason"] }}
+                            </td>
+
+                            <td>
+
+                                <span class="status
+                                {{ appointment['status']|lower }}">
+
+                                    {{ appointment["status"] }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {% if appointment["status"] == "Pending" %}
+
+                                <a href="{{ url_for(
+                                        'approve_appointment',
+                                        appointment_id=appointment['id']
+                                    ) }}" class="action approve">
+                                    Approve
+                                </a>
+
+                                <a href="{{ url_for(
+                                        'reject_appointment',
+                                        appointment_id=appointment['id']
+                                    ) }}" class="action reject">
+                                    Reject
+                                </a>
+
+                                {% else %}
+
+                                <span class="completed">
+                                    Completed
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty">
+
+                <h3>No appointment requests</h3>
+
+                <p>
+                    There are currently no student appointments.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
