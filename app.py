@@ -86,16 +86,31 @@ def initialize_database():
 
     default_password = os.environ.get("DEFAULT_PASSWORD", "1234")
     defaults = [
-        ("Juan Student", "student", "student"),
-        ("Ms. Maria Counselor", "counselor", "counselor"),
-        ("System Administrator", "admin", "admin"),
+        ("Juan Student", "student", "student", default_password),
+        (
+            "Ms. Maria Counselor",
+            os.environ.get("COUNSELOR_USERNAME", "counselor"),
+            "counselor",
+            os.environ.get("COUNSELOR_PASSWORD", default_password),
+        ),
+        (
+            "System Administrator",
+            os.environ.get("ADMIN_USERNAME", "admin"),
+            "admin",
+            os.environ.get("ADMIN_PASSWORD", default_password),
+        ),
     ]
-    for name, username, role in defaults:
+    for name, username, role, password in defaults:
         exists = cursor.execute("SELECT 1 FROM users WHERE username = ?", (username,)).fetchone()
         if exists is None:
             cursor.execute(
                 "INSERT INTO users (name, username, password, role) VALUES (?, ?, ?, ?)",
-                (name, username, generate_password_hash(default_password), role),
+                (name, username, generate_password_hash(password), role),
+            )
+        elif role != "student" and (os.environ.get(f"{role.upper()}_PASSWORD")):
+            cursor.execute(
+                "UPDATE users SET password = ?, role = ? WHERE username = ?",
+                (generate_password_hash(password), role, username),
             )
 
     conn.commit()
