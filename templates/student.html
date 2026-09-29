@@ -1,168 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}My appointments{% endblock %}
 
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Student Dashboard</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-</head>
-
-<body>
-
-    <nav class="navbar">
-
-        <div class="brand">
-            <span class="brand-logo">G</span>
-            Guidance Office
+{% block content %}
+<main class="page">
+    <header class="page-head split reveal">
+        <div>
+            <p class="eyebrow">Student dashboard</p>
+            <h1>Hi, {{ session.get('name').split(' ')[0] }}</h1>
+            <p class="muted">Here&apos;s an overview of your guidance appointments.</p>
         </div>
+        <a href="{{ url_for('book_appointment') }}" class="btn primary">+ Book appointment</a>
+    </header>
 
-        <div class="nav-right">
+    <section class="stats" aria-label="Summary">
+        <div class="stat reveal" style="--d: 60ms"><span class="stat-label">Total</span><strong data-count="{{ appointments|length }}">0</strong></div>
+        <div class="stat pending reveal" style="--d: 120ms"><span class="stat-label">Pending</span><strong data-count="{{ counts.Pending }}">0</strong></div>
+        <div class="stat approved reveal" style="--d: 180ms"><span class="stat-label">Approved</span><strong data-count="{{ counts.Approved }}">0</strong></div>
+        <div class="stat rejected reveal" style="--d: 240ms"><span class="stat-label">Rejected</span><strong data-count="{{ counts.Rejected }}">0</strong></div>
+    </section>
 
-            <span>
-                {{ session["name"] }}
-            </span>
-
-            <a href="{{ url_for('logout') }}">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
-
-    <div class="container">
-
-        <div class="welcome">
-
-            <h1>Student Dashboard</h1>
-
-            <p>
-                Welcome, {{ session["name"] }}!
-            </p>
-
-        </div>
-
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-
-        {% for category, message in messages %}
-
-        <div class="alert {{ category }}">
-            {{ message }}
-        </div>
-
-        {% endfor %}
-
-        {% endwith %}
-
-
-        <div class="dashboard-card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <h2>My Appointments</h2>
-
-                    <p>
-                        View your guidance appointment requests.
-                    </p>
-
+    <section class="card reveal" style="--d: 300ms">
+        <div class="card-head"><h2>My appointments</h2></div>
+        {% if appointments %}
+        <ul class="appt-list">
+            {% for a in appointments %}
+            <li class="appt reveal" style="--d: {{ 320 + loop.index0 * 50 }}ms">
+                <div class="appt-date">
+                    <span>{{ a.date }}</span>
+                    <small>{{ a.time }}</small>
                 </div>
-
-                <a href="{{ url_for('book_appointment') }}" class="btn primary">
-                    + Book Appointment
-                </a>
-
-            </div>
-
-
-            {% if appointments %}
-
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        {% for appointment in appointments %}
-
-                        <tr>
-
-                            <td>
-                                {{ appointment["date"] }}
-                            </td>
-
-                            <td>
-                                {{ appointment["time"] }}
-                            </td>
-
-                            <td>
-                                {{ appointment["reason"] }}
-                            </td>
-
-                            <td>
-
-                                <span class="status
-                                {{ appointment['status']|lower }}">
-
-                                    {{ appointment["status"] }}
-
-                                </span>
-
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            {% else %}
-
-            <div class="empty">
-
-                <h3>No appointments yet</h3>
-
-                <p>
-                    You haven't requested a guidance appointment.
-                </p>
-
-                <a href="{{ url_for('book_appointment') }}" class="btn primary">
-                    Book Appointment
-                </a>
-
-            </div>
-
-            {% endif %}
-
+                <div class="appt-body">
+                    <p>{{ a.reason }}</p>
+                    <div class="tags">
+                        {% if a.department %}<span class="tag">{{ a.department }}</span>{% endif %}
+                        {% if a.year_level %}<span class="tag">{{ a.year_level }}</span>{% endif %}
+                    </div>
+                </div>
+                <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty">
+            <p><strong>No appointments yet</strong></p>
+            <p class="muted">Book your first session with a counselor.</p>
+            <a href="{{ url_for('book_appointment') }}" class="btn primary">Book appointment</a>
         </div>
-
-    </div>
-
-</body>
-
-</html>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

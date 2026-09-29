@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f5c55">
+    <meta name="description" content="Book and manage guidance counseling appointments at the CKCM Guidance Office.">
+    <title>{% block title %}Guidance Appointment System{% endblock %} · CKCM Guidance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% block body_class %}app-body{% endblock %}">
+
+{% if session.get('user_id') and not hide_nav %}
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-mark" aria-hidden="true">G</span>
+            <span class="brand-text">
+                <strong>Guidance</strong>
+                <small>CKCM Guidance Office</small>
+            </span>
+        </a>
+        <nav class="topnav" aria-label="Main">
+            {% if session.get('role') == 'student' %}
+                <a href="{{ url_for('student_dashboard') }}" class="{{ 'active' if request.endpoint == 'student_dashboard' }}">My Appointments</a>
+                <a href="{{ url_for('book_appointment') }}" class="{{ 'active' if request.endpoint == 'book_appointment' }}">Book</a>
+            {% elif session.get('role') == 'counselor' %}
+                <a href="{{ url_for('counselor_dashboard') }}" class="active">Requests</a>
+            {% elif session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="active">Dashboard</a>
+            {% endif %}
+        </nav>
+        <div class="user-chip">
+            <span class="avatar" aria-hidden="true">{{ session.get('name', '?')[0] | upper }}</span>
+            <span class="user-meta">
+                <strong>{{ session.get('name') }}</strong>
+                <small>{{ session.get('role') | capitalize }}</small>
+            </span>
+            <a href="{{ url_for('logout') }}" class="btn ghost sm">Log out</a>
+        </div>
+    </div>
+</header>
+{% endif %}
+
+<div class="toast-stack" aria-live="polite">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="toast {{ category }}" role="status">
+            <span class="toast-dot" aria-hidden="true"></span>
+            <span>{{ message }}</span>
+            <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+        </div>
+        {% endfor %}
+    {% endwith %}
+</div>
+
+{% block content %}{% endblock %}
+
+<script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>
