@@ -26,7 +26,8 @@
                 </div>
                 <div class="field">
                     <label for="time">Time</label>
-                    <input type="time" name="time" id="time" value="{{ form.get('time') or '' }}" min="08:00" max="17:00" required>
+                    <input type="time" name="time" id="time" value="{{ form.get('time') or '' }}" min="08:00" max="17:00" required aria-describedby="time-hint" data-error="Please pick a time between 8:00 AM and 5:00 PM.">
+                    <small class="field-hint" id="time-hint">Office hours: 8:00 AM – 5:00 PM</small>
                 </div>
             </div>
             <div class="field">

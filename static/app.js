@@ -54,7 +54,18 @@
       if (!form.checkValidity()) {
         e.preventDefault();
         form.querySelectorAll(":invalid").forEach((f) => {
-          f.closest(".field")?.classList.add("invalid");
+          const field = f.closest(".field");
+          if (!field) return;
+          field.classList.add("invalid");
+          let msg = field.querySelector(".field-error");
+          if (!msg) {
+            msg = document.createElement("small");
+            msg.className = "field-error";
+            msg.setAttribute("role", "alert");
+            field.appendChild(msg);
+          }
+          const outOfRange = f.validity.rangeUnderflow || f.validity.rangeOverflow;
+          msg.textContent = (outOfRange && f.dataset.error) || f.validationMessage;
         });
         form.querySelector(":invalid")?.focus();
         return;
@@ -63,7 +74,10 @@
     });
     form.addEventListener("input", (e) => {
       const field = e.target.closest(".field");
-      if (field && e.target.checkValidity()) field.classList.remove("invalid");
+      if (field && e.target.checkValidity()) {
+        field.classList.remove("invalid");
+        field.querySelector(".field-error")?.remove();
+      }
     });
   });
 

@@ -399,6 +399,8 @@ def book_appointment():
             error = "Please enter a valid contact number."
         elif form["year_level"] not in YEAR_LEVELS or form["department"] not in DEPARTMENTS:
             error = "Please choose a valid year level and department."
+        elif not ("08:00" <= form["time"][:5] <= "17:00"):
+            error = "Please pick a time between 8:00 AM and 5:00 PM."
 
         if error:
             flash(error, "error")
