@@ -1,0 +1,80 @@
+<div class="toolbar" data-filter-root>
+    <div class="segmented" role="tablist" aria-label="Filter by status">
+        <button type="button" class="active" data-status="all">All</button>
+        <button type="button" data-status="pending">Pending</button>
+        <button type="button" data-status="approved">Approved</button>
+        <button type="button" data-status="rejected">Rejected</button>
+    </div>
+    <label class="search">
+        <span class="sr-only">Search appointments</span>
+        <input type="search" placeholder="Search name, department, contact..." data-search>
+    </label>
+</div>
+
+{% if appointments %}
+<div class="table-wrap">
+    <table class="table" data-filter-table>
+        <thead>
+            <tr>
+                <th scope="col">Student</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Year &amp; Department</th>
+                <th scope="col">Schedule</th>
+                <th scope="col">Reason</th>
+                <th scope="col">Status</th>
+                {% if show_actions %}<th scope="col"><span class="sr-only">Actions</span></th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in appointments %}
+            <tr data-status="{{ a.status | lower }}" class="row-in" style="--d: {{ loop.index0 * 40 }}ms">
+                <td data-label="Student">
+                    <div class="person">
+                        <span class="avatar sm" aria-hidden="true">{{ a.student_name[0] | upper }}</span>
+                        <strong>{{ a.student_name }}</strong>
+                    </div>
+                </td>
+                <td data-label="Contact">
+                    {% if a.contact_number %}<a href="tel:{{ a.contact_number | replace(' ', '') }}" class="link">{{ a.contact_number }}</a>{% else %}<span class="muted">&mdash;</span>{% endif %}
+                </td>
+                <td data-label="Year & Dept">
+                    <div class="stack">
+                        <span>{{ a.year_level or '—' }}</span>
+                        <small class="muted">{{ a.department or '—' }}</small>
+                    </div>
+                </td>
+                <td data-label="Schedule">
+                    <div class="stack"><span>{{ a.date }}</span><small class="muted">{{ a.time }}</small></div>
+                </td>
+                <td data-label="Reason" class="reason">{{ a.reason }}</td>
+                <td data-label="Status"><span class="badge {{ a.status | lower }}">{{ a.status }}</span></td>
+                {% if show_actions %}
+                <td data-label="Actions">
+                    {% if a.status == 'Pending' %}
+                    <div class="actions">
+                        <form method="POST" action="{{ url_for('approve_appointment', appointment_id=a.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn success sm">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('reject_appointment', appointment_id=a.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn danger-outline sm">Reject</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span class="muted">Reviewed</span>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="empty-filter muted" hidden>No appointments match your filter.</p>
+</div>
+{% else %}
+<div class="empty">
+    <p><strong>No appointment requests yet</strong></p>
+    <p class="muted">New requests from students will appear here.</p>
+</div>
+{% endif %}

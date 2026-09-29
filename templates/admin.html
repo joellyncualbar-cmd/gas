@@ -1,312 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Admin Dashboard</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-</head>
-
-<body>
-
-    <nav class="navbar">
-
-        <div class="brand">
-            <span class="brand-logo">G</span>
-            Guidance Office
-        </div>
-
-        <div class="nav-right">
-
-            <span>
-                {{ session["name"] }}
-            </span>
-
-            <a href="{{ url_for('logout') }}">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
-
-    <div class="container">
-
-        <div class="welcome">
-
-            <h1>Admin Dashboard</h1>
-
-            <p>
-                Manage the Guidance Appointment System.
-            </p>
-
-        </div>
-
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-
-        {% for category, message in messages %}
-
-        <div class="alert {{ category }}">
-            {{ message }}
-        </div>
-
-        {% endfor %}
-
-        {% endwith %}
-
-
-        <!-- STATISTICS -->
-
-        <div class="stats">
-
-            <div class="stat-card">
-
-                <h3>Total Users</h3>
-
-                <strong>
-                    {{ total_users }}
-                </strong>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <h3>Total Appointments</h3>
-
-                <strong>
-                    {{ total_appointments }}
-                </strong>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <h3>Pending</h3>
-
-                <strong>
-                    {{ pending }}
-                </strong>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <h3>Approved</h3>
-
-                <strong>
-                    {{ approved }}
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <!-- ADD USER -->
-
-        <div class="dashboard-card">
-
-            <h2>Add New User</h2>
-
-            <form method="POST" action="{{ url_for('add_user') }}" class="user-form">
-
-                <input type="text" name="name" placeholder="Full name" required>
-
-                <input type="text" name="username" placeholder="Username" required>
-
-                <input type="password" name="password" placeholder="Password" required>
-
-                <select name="role" required>
-
-                    <option value="student">
-                        Student
-                    </option>
-
-                    <option value="counselor">
-                        Counselor
-                    </option>
-
-                    <option value="admin">
-                        Admin
-                    </option>
-
-                </select>
-
-                <button type="submit" class="btn primary">
-                    Add User
-                </button>
-
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+
+{% block content %}
+<main class="page">
+    <header class="page-head reveal">
+        <p class="eyebrow">Administrator</p>
+        <h1>System overview</h1>
+        <p class="muted">Manage users and monitor all guidance appointments.</p>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+        <div class="stat reveal" style="--d: 60ms"><span class="stat-label">Users</span><strong data-count="{{ total_users }}">0</strong></div>
+        <div class="stat reveal" style="--d: 120ms"><span class="stat-label">Appointments</span><strong data-count="{{ total_appointments }}">0</strong></div>
+        <div class="stat pending reveal" style="--d: 180ms"><span class="stat-label">Pending</span><strong data-count="{{ pending }}">0</strong></div>
+        <div class="stat approved reveal" style="--d: 240ms"><span class="stat-label">Approved</span><strong data-count="{{ approved }}">0</strong></div>
+    </section>
+
+    <section class="card reveal" style="--d: 280ms">
+        <div class="card-head"><h2>All appointments</h2></div>
+        {% with show_actions = False %}{% include "_appointments_table.html" %}{% endwith %}
+    </section>
+
+    <div class="grid-2">
+        <section class="card reveal" style="--d: 320ms">
+            <div class="card-head"><h2>Add user</h2></div>
+            <form method="POST" action="{{ url_for('add_user') }}" class="form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="new_name">Full name</label>
+                    <input type="text" name="name" id="new_name" required>
+                </div>
+                <div class="field">
+                    <label for="new_username">Username</label>
+                    <input type="text" name="username" id="new_username" required autocomplete="off">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="new_password">Password</label>
+                        <input type="password" name="password" id="new_password" required minlength="6" autocomplete="new-password">
+                    </div>
+                    <div class="field">
+                        <label for="new_role">Role</label>
+                        <select name="role" id="new_role">
+                            <option value="student">Student</option>
+                            <option value="counselor">Counselor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn primary block">Add user</button>
             </form>
+        </section>
 
-        </div>
-
-
-        <!-- USERS -->
-
-        <div class="dashboard-card">
-
-            <h2>System Users</h2>
-
-            <div class="table-container">
-
-                <table>
-
+        <section class="card reveal" style="--d: 360ms">
+            <div class="card-head"><h2>Users</h2></div>
+            <div class="table-wrap">
+                <table class="table compact">
                     <thead>
-
                         <tr>
-
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th>Action</th>
-
+                            <th scope="col">Name</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Contact</th>
+                            <th scope="col">Year &amp; Dept</th>
+                            <th scope="col"><span class="sr-only">Actions</span></th>
                         </tr>
-
                     </thead>
-
-
                     <tbody>
-
-                        {% for user in users %}
-
-                        <tr>
-
-                            <td>
-                                {{ user["id"] }}
+                        {% for u in users %}
+                        <tr class="row-in" style="--d: {{ loop.index0 * 30 }}ms">
+                            <td data-label="Name">
+                                <div class="stack"><strong>{{ u.name }}</strong><small class="muted">@{{ u.username }}</small></div>
                             </td>
-
-                            <td>
-                                {{ user["name"] }}
+                            <td data-label="Role"><span class="badge role-{{ u.role }}">{{ u.role | capitalize }}</span></td>
+                            <td data-label="Contact">{{ u.contact_number or '—' }}</td>
+                            <td data-label="Year & Dept">
+                                <div class="stack"><span>{{ u.year_level or '—' }}</span><small class="muted">{{ u.department or '' }}</small></div>
                             </td>
-
-                            <td>
-                                {{ user["username"] }}
-                            </td>
-
-                            <td>
-                                {{ user["role"] }}
-                            </td>
-
-                            <td>
-
-                                {% if user["id"] != session["user_id"] %}
-
-                                <a href="{{ url_for(
-                                    'delete_user',
-                                    user_id=user['id']
-                                ) }}" class="action reject" onclick="return confirm(
-                                    'Delete this user?'
-                                )">
-                                    Delete
-                                </a>
-
+                            <td data-label="Actions">
+                                {% if u.id != session.get('user_id') %}
+                                <form method="POST" action="{{ url_for('delete_user', user_id=u.id) }}" data-confirm="Delete {{ u.name }}? Their appointments will also be removed.">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn danger-outline sm">Delete</button>
+                                </form>
                                 {% else %}
-
-                                <span class="completed">
-                                    Current User
-                                </span>
-
+                                <span class="muted">You</span>
                                 {% endif %}
-
                             </td>
-
                         </tr>
-
                         {% endfor %}
-
                     </tbody>
-
                 </table>
-
             </div>
-
-        </div>
-
-
-        <!-- APPOINTMENTS -->
-
-        <div class="dashboard-card">
-
-            <h2>All Appointments</h2>
-
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Student</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        {% for appointment in appointments %}
-
-                        <tr>
-
-                            <td>
-                                {{ appointment["student_name"] }}
-                            </td>
-
-                            <td>
-                                {{ appointment["date"] }}
-                            </td>
-
-                            <td>
-                                {{ appointment["time"] }}
-                            </td>
-
-                            <td>
-                                {{ appointment["reason"] }}
-                            </td>
-
-                            <td>
-
-                                <span class="status
-                                {{ appointment['status']|lower }}">
-
-                                    {{ appointment["status"] }}
-
-                                </span>
-
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+        </section>
     </div>
-
-</body>
-
-</html>
+</main>
+{% endblock %}
