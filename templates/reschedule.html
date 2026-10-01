@@ -6,7 +6,11 @@
     <header class="page-head reveal">
         <p class="eyebrow">Update request</p>
         <h1>Reschedule appointment</h1>
+        {% if session.get('role') == 'student' %}
         <p class="muted">Pick a new schedule. A counselor will need to approve it again.</p>
+        {% else %}
+        <p class="muted">Pick a new schedule for {{ appointment.student_name }}. The status will stay {{ appointment.status }}.</p>
+        {% endif %}
     </header>
 
     <form method="POST" class="card form reveal" style="--d: 100ms" novalidate>
@@ -15,6 +19,9 @@
         <fieldset>
             <legend>Current booking</legend>
             <div class="appt-body">
+                {% if session.get('role') != 'student' %}
+                <p><strong>{{ appointment.student_name }}</strong></p>
+                {% endif %}
                 <p><strong>{{ appointment.date }}</strong> at {{ appointment.time }}</p>
                 <p class="muted">{{ appointment.reason }}</p>
                 <div class="tags">
@@ -40,7 +47,7 @@
         </fieldset>
 
         <div class="form-actions">
-            <a href="{{ url_for('student_dashboard') }}" class="btn ghost">Cancel</a>
+            <a href="{{ url_for('dashboard') }}" class="btn ghost">Cancel</a>
             <button type="submit" class="btn primary">Confirm reschedule</button>
         </div>
     </form>
