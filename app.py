@@ -303,6 +303,37 @@ class Appointment:
         conn.close()
         return changed
 
+    @staticmethod
+    def update_reason(appointment_id, student_id, reason):
+        conn = get_db()
+        cursor = conn.execute(
+            """
+            UPDATE appointments
+            SET reason = ?
+            WHERE id = ? AND student_id = ? AND status IN ('Pending', 'Approved')
+            """,
+            (reason, appointment_id, student_id),
+        )
+        conn.commit()
+        changed = cursor.rowcount > 0
+        conn.close()
+        return changed
+
+    @staticmethod
+    def cancel(appointment_id, student_id):
+        conn = get_db()
+        cursor = conn.execute(
+            """
+            DELETE FROM appointments
+            WHERE id = ? AND student_id = ? AND status IN ('Pending', 'Approved')
+            """,
+            (appointment_id, student_id),
+        )
+        conn.commit()
+        changed = cursor.rowcount > 0
+        conn.close()
+        return changed
+
 
 def count_by_status(appointments):
     counts = {"Pending": 0, "Approved": 0, "Rejected": 0}
@@ -470,6 +501,46 @@ def book_appointment():
     profile = User.get_profile(session["user_id"])
     form = dict(profile) if profile else {}
     return render_template("book.html", form=form, **context)
+
+
+@app.route("/edit/<int:appointment_id>", methods=["GET", "POST"])
+@role_required("student")
+def edit_appointment(appointment_id):
+    appointment = Appointment.get_for_student(appointment_id, session["user_id"])
+
+    if appointment is None:
+        abort(404)
+    if appointment["status"] not in ("Pending", "Approved"):
+        flash("Only pending or approved appointments can be edited.", "error")
+        return redirect(url_for("student_dashboard"))
+
+    if request.method == "POST":
+        reason = request.form.get("reason", "").strip()
+
+        if not reason:
+            flash("Please enter a reason for the appointment.", "error")
+            return render_template("edit.html", appointment=appointment, form={"reason": reason})
+        if len(reason) > 1000:
+            flash("Reason is too long (1000 characters max).", "error")
+            return render_template("edit.html", appointment=appointment, form={"reason": reason})
+
+        if Appointment.update_reason(appointment_id, session["user_id"], reason):
+            flash("Appointment updated.", "success")
+        else:
+            flash("This appointment can no longer be edited.", "error")
+        return redirect(url_for("student_dashboard"))
+
+    return render_template("edit.html", appointment=appointment, form={"reason": appointment["reason"]})
+
+
+@app.route("/cancel/<int:appointment_id>", methods=["POST"])
+@role_required("student")
+def cancel_appointment(appointment_id):
+    if Appointment.cancel(appointment_id, session["user_id"]):
+        flash("Appointment cancelled.", "success")
+    else:
+        flash("This appointment can no longer be cancelled.", "error")
+    return redirect(url_for("student_dashboard"))
 
 
 # ==========================================================
