@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Reschedule appointment{% endblock %}
+
+{% block content %}
+<main class="page narrow">
+    <header class="page-head reveal">
+        <p class="eyebrow">Update request</p>
+        <h1>Reschedule appointment</h1>
+        <p class="muted">Pick a new schedule. A counselor will need to approve it again.</p>
+    </header>
+
+    <form method="POST" class="card form reveal" style="--d: 100ms" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <fieldset>
+            <legend>Current booking</legend>
+            <div class="appt-body">
+                <p><strong>{{ appointment.date }}</strong> at {{ appointment.time }}</p>
+                <p class="muted">{{ appointment.reason }}</p>
+                <div class="tags">
+                    {% if appointment.department %}<span class="tag">{{ appointment.department }}</span>{% endif %}
+                    {% if appointment.year_level %}<span class="tag">{{ appointment.year_level }}</span>{% endif %}
+                    <span class="badge {{ appointment.status | lower }}">{{ appointment.status }}</span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>New schedule</legend>
+            <div class="field-row">
+                <div class="field">
+                    <label for="date">Date</label>
+                    <input type="date" name="date" id="date" value="{{ form.get('date') or '' }}" required data-min-today>
+                </div>
+                <div class="field">
+                    <label for="time">Time</label>
+                    <input type="time" name="time" id="time" value="{{ form.get('time') or '' }}" min="08:00" max="17:00" required>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <a href="{{ url_for('student_dashboard') }}" class="btn ghost">Cancel</a>
+            <button type="submit" class="btn primary">Confirm reschedule</button>
+        </div>
+    </form>
+</main>
+{% endblock %}
