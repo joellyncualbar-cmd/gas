@@ -467,7 +467,19 @@ def student_dashboard():
 @app.route("/book", methods=["GET", "POST"])
 @role_required("student")
 def book_appointment():
-    context = {"year_levels": YEAR_LEVELS, "departments": DEPARTMENTS}
+    profile = User.get_profile(session["user_id"])
+
+    # Year level and department come from the student's profile and cannot be
+    # changed here. If a value was never saved, the student may pick it once.
+    locked_year = profile["year_level"] if profile and profile["year_level"] in YEAR_LEVELS else None
+    locked_department = profile["department"] if profile and profile["department"] in DEPARTMENTS else None
+
+    context = {
+        "year_levels": YEAR_LEVELS,
+        "departments": DEPARTMENTS,
+        "lock_year": locked_year is not None,
+        "lock_department": locked_department is not None,
+    }
 
     if request.method == "POST":
         form = {
@@ -475,8 +487,8 @@ def book_appointment():
             "time": request.form.get("time", ""),
             "reason": request.form.get("reason", "").strip(),
             "contact_number": request.form.get("contact_number", "").strip(),
-            "year_level": request.form.get("year_level", ""),
-            "department": request.form.get("department", ""),
+            "year_level": locked_year or request.form.get("year_level", ""),
+            "department": locked_department or request.form.get("department", ""),
         }
 
         error = None
@@ -498,7 +510,6 @@ def book_appointment():
         flash("Appointment request submitted successfully!", "success")
         return redirect(url_for("student_dashboard"))
 
-    profile = User.get_profile(session["user_id"])
     form = dict(profile) if profile else {}
     return render_template("book.html", form=form, **context)
 
