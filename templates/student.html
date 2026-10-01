@@ -37,6 +37,9 @@
                     </div>
                 </div>
                 <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
+                {% if a.status in ['Pending', 'Approved'] %}
+                <a href="{{ url_for('reschedule_appointment', appointment_id=a.id) }}" class="btn ghost">Reschedule</a>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
