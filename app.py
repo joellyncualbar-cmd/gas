@@ -249,6 +249,16 @@ class Appointment:
         return row
 
     @staticmethod
+    def get_by_id(appointment_id):
+        conn = get_db()
+        row = conn.execute(
+            APPOINTMENT_SELECT + " WHERE appointments.id = ?",
+            (appointment_id,),
+        ).fetchone()
+        conn.close()
+        return row
+
+    @staticmethod
     def get_all_appointments():
         conn = get_db()
         rows = conn.execute(APPOINTMENT_SELECT + " ORDER BY appointments.date, appointments.time").fetchall()
@@ -263,21 +273,31 @@ class Appointment:
         conn.close()
 
     @staticmethod
-    def reschedule(appointment_id, student_id, date, time):
-        """Move an appointment to a new slot and send it back for approval.
+    def reschedule(appointment_id, date, time, student_id=None):
+        """Move an appointment to a new slot.
 
-        Ownership and status are enforced in the WHERE clause, so this returns
-        False if the appointment isn't the student's or is no longer editable.
+        With student_id: ownership is enforced and the status resets to Pending.
+        Without it (staff): any Pending/Approved appointment, status unchanged.
         """
         conn = get_db()
-        cursor = conn.execute(
-            """
-            UPDATE appointments
-            SET date = ?, time = ?, status = 'Pending'
-            WHERE id = ? AND student_id = ? AND status IN ('Pending', 'Approved')
-            """,
-            (date, time, appointment_id, student_id),
-        )
+        if student_id is not None:
+            cursor = conn.execute(
+                """
+                UPDATE appointments
+                SET date = ?, time = ?, status = 'Pending'
+                WHERE id = ? AND student_id = ? AND status IN ('Pending', 'Approved')
+                """,
+                (date, time, appointment_id, student_id),
+            )
+        else:
+            cursor = conn.execute(
+                """
+                UPDATE appointments
+                SET date = ?, time = ?
+                WHERE id = ? AND status IN ('Pending', 'Approved')
+                """,
+                (date, time, appointment_id),
+            )
         conn.commit()
         changed = cursor.rowcount > 0
         conn.close()
@@ -452,16 +472,30 @@ def book_appointment():
     return render_template("book.html", form=form, **context)
 
 
+# ==========================================================
+# RESCHEDULE (student, counselor, admin)
+# ==========================================================
+
 @app.route("/reschedule/<int:appointment_id>", methods=["GET", "POST"])
-@role_required("student")
+@login_required
 def reschedule_appointment(appointment_id):
-    appointment = Appointment.get_for_student(appointment_id, session["user_id"])
+    role = session.get("role")
+    if role not in ("student", "counselor", "admin"):
+        abort(403)
+
+    is_student = role == "student"
+    student_id = session["user_id"] if is_student else None
+
+    if is_student:
+        appointment = Appointment.get_for_student(appointment_id, session["user_id"])
+    else:
+        appointment = Appointment.get_by_id(appointment_id)
 
     if appointment is None:
         abort(404)
     if appointment["status"] not in ("Pending", "Approved"):
         flash("Only pending or approved appointments can be rescheduled.", "error")
-        return redirect(url_for("student_dashboard"))
+        return redirect(url_for("dashboard"))
 
     if request.method == "POST":
         form = {
@@ -481,17 +515,20 @@ def reschedule_appointment(appointment_id):
             elif not (OFFICE_OPEN <= form["time"] <= OFFICE_CLOSE):
                 error = "Please choose a time between 8:00 AM and 5:00 PM."
             elif form["date"] == appointment["date"] and form["time"] == appointment["time"]:
-                error = "That is already your current schedule."
+                error = "That is already the current schedule."
 
         if error:
             flash(error, "error")
             return render_template("reschedule.html", appointment=appointment, form=form)
 
-        if Appointment.reschedule(appointment_id, session["user_id"], form["date"], form["time"]):
-            flash("Appointment rescheduled. It is now pending counselor approval.", "success")
+        if Appointment.reschedule(appointment_id, form["date"], form["time"], student_id):
+            if is_student:
+                flash("Appointment rescheduled. It is now pending counselor approval.", "success")
+            else:
+                flash("Appointment rescheduled.", "success")
         else:
             flash("This appointment can no longer be rescheduled.", "error")
-        return redirect(url_for("student_dashboard"))
+        return redirect(url_for("dashboard"))
 
     form = {"date": appointment["date"], "time": appointment["time"]}
     return render_template("reschedule.html", appointment=appointment, form=form)
