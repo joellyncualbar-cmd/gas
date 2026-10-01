@@ -35,13 +35,18 @@
                         {% if a.department %}<span class="tag">{{ a.department }}</span>{% endif %}
                         {% if a.year_level %}<span class="tag">{{ a.year_level }}</span>{% endif %}
                     </div>
-                </div>
-                <div class="appt-actions" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-                    <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
                     {% if a.status in ['Pending', 'Approved'] %}
-                    <a href="{{ url_for('reschedule_appointment', appointment_id=a.id) }}" class="btn ghost sm">Reschedule</a>
+                    <div class="actions" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                        <a href="{{ url_for('reschedule_appointment', appointment_id=a.id) }}" class="btn ghost sm">Reschedule</a>
+                        <a href="{{ url_for('edit_appointment', appointment_id=a.id) }}" class="btn ghost sm">Edit</a>
+                        <form method="POST" action="{{ url_for('cancel_appointment', appointment_id=a.id) }}" data-confirm="Cancel this appointment? This cannot be undone." style="margin:0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn danger-outline sm">Cancel</button>
+                        </form>
+                    </div>
                     {% endif %}
                 </div>
+                <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
             </li>
             {% endfor %}
         </ul>
