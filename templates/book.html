@@ -15,6 +15,9 @@
         <fieldset>
             <legend>Student information</legend>
             {% include "_student_fields.html" %}
+            {% if lock_year or lock_department %}
+            <p class="muted"><small>Your year level and department come from your account and can&apos;t be changed here.</small></p>
+            {% endif %}
         </fieldset>
 
         <fieldset>
@@ -41,4 +44,21 @@
         </div>
     </form>
 </main>
+
+<script>
+(function () {
+    var locks = {
+        year_level: {{ 'true' if lock_year else 'false' }},
+        department: {{ 'true' if lock_department else 'false' }}
+    };
+    Object.keys(locks).forEach(function (name) {
+        if (!locks[name]) return;
+        var el = document.querySelector('[name="' + name + '"]');
+        if (el) {
+            el.disabled = true;
+            el.title = 'Set from your account. This cannot be changed here.';
+        }
+    });
+})();
+</script>
 {% endblock %}
