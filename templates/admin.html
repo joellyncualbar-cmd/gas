@@ -18,7 +18,7 @@
 
     <section class="card reveal" style="--d: 280ms">
         <div class="card-head"><h2>All appointments</h2></div>
-        {% with show_actions = False %}{% include "_appointments_table.html" %}{% endwith %}
+        {% with show_actions = False, show_reschedule = True %}{% include "_appointments_table.html" %}{% endwith %}
     </section>
 
     <div class="grid-2">
