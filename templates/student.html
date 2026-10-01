@@ -36,10 +36,12 @@
                         {% if a.year_level %}<span class="tag">{{ a.year_level }}</span>{% endif %}
                     </div>
                 </div>
-                <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
-                {% if a.status in ['Pending', 'Approved'] %}
-                <a href="{{ url_for('reschedule_appointment', appointment_id=a.id) }}" class="btn ghost">Reschedule</a>
-                {% endif %}
+                <div class="appt-actions" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                    <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
+                    {% if a.status in ['Pending', 'Approved'] %}
+                    <a href="{{ url_for('reschedule_appointment', appointment_id=a.id) }}" class="btn ghost sm">Reschedule</a>
+                    {% endif %}
+                </div>
             </li>
             {% endfor %}
         </ul>
