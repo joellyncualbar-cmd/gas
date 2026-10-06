@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Guidance Appointment System</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="login-body">
+
+    <div class="login-card">
+
+        <!-- LEFT PANEL -->
+        <div class="login-left">
+
+            <div class="login-logo">G</div>
+
+            <h1>Guidance<br>Appointment<br>System</h1>
+
+            <div class="school">CKCM Guidance Office</div>
+
+            <p class="quote">
+                "Your well-being matters.<br>We're here to guide you."
+            </p>
+
+            <div class="deco">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22v-8"></path>
+                    <path d="M12 14c-4-1-6-4-6-8 4 0 7 2 8 6 1-4 4-6 8-6 0 4-2 7-6 8"></path>
+                    <rect x="6" y="19" width="12" height="3" rx="1"></rect>
+                </svg>
+            </div>
+
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="login-right">
+
+            <h1>Welcome Back!</h1>
+            <p>Log in to your account to continue to the Guidance Appointment System.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% for category, message in messages %}
+
+            <div class="alert {{ category }}">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+            {% endwith %}
+
+            <form method="POST" id="loginForm">
+
+                <div class="input-group">
+
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+
+                    <input type="text" name="username" id="username" placeholder="Enter username" required
+                        autocomplete="username">
+
+                </div>
+
+                <div class="input-group">
+
+                    <span class="icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </span>
+
+                    <input type="password" name="password" id="password" placeholder="Enter password" required
+                        autocomplete="current-password">
+
+                    <span class="toggle-eye" id="toggleEye">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+
+                </div>
+
+                <button type="submit" class="btn primary">Login</button>
+
+            </form>
+
+            <div class="login-divider">Login as</div>
+
+            <div class="quick-login">
+
+                <button type="button" onclick="quickFill('student')">
+                    <span class="qicon student">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 10 12 5 2 10l10 5 10-5z"></path>
+                            <path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"></path>
+                        </svg>
+                    </span>
+                    <div class="qlabel">Student</div>
+                    <div class="qhint">/ 1234</div>
+                </button>
+
+                <button type="button" onclick="quickFill('counselor')">
+                    <span class="qicon counselor">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </span>
+                    <div class="qlabel">Counselor</div>
+                    <div class="qhint">/ 1234</div>
+                </button>
+
+                <button type="button" onclick="quickFill('admin')">
+                    <span class="qicon admin">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5l-8-3z"></path>
+                        </svg>
+                    </span>
+                    <div class="qlabel">Admin</div>
+                    <div class="qhint">/ 1234</div>
+                </button>
+
+            </div>
+
+            <p class="switch-auth">
+                Don't have an account?
+                <a href="{{ url_for('signup') }}">Create one</a>
+            </p>
+
+        </div>
+
+    </div>
+
+    <script>
+        function quickFill(role) {
+            document.getElementById('username').value = role;
+            document.getElementById('password').value = '1234';
+        }
+
+        document.getElementById('toggleEye').addEventListener('click', function () {
+            var pw = document.getElementById('password');
+            pw.type = pw.type === 'password' ? 'text' : 'password';
+        });
+    </script>
+
+</body>
+
+</html>
