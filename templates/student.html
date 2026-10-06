@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}My appointments{% endblock %}
+
+{% block content %}
+<main class="page">
+    <header class="page-head split reveal">
+        <div>
+            <p class="eyebrow">Student dashboard</p>
+            <h1>Hi, {{ session.get('name').split(' ')[0] }}</h1>
+            <p class="muted">Here&apos;s an overview of your guidance appointments.</p>
+        </div>
+        <a href="{{ url_for('book_appointment') }}" class="btn primary">+ Book appointment</a>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+        <div class="stat reveal" style="--d: 60ms"><span class="stat-label">Total</span><strong
+                data-count="{{ appointments|length }}">0</strong></div>
+        <div class="stat pending reveal" style="--d: 120ms"><span class="stat-label">Pending</span><strong
+                data-count="{{ counts.Pending }}">0</strong></div>
+        <div class="stat approved reveal" style="--d: 180ms"><span class="stat-label">Approved</span><strong
+                data-count="{{ counts.Approved }}">0</strong></div>
+        <div class="stat rejected reveal" style="--d: 240ms"><span class="stat-label">Rejected</span><strong
+                data-count="{{ counts.Rejected }}">0</strong></div>
+    </section>
+
+    <section class="card reveal" style="--d: 300ms">
+        <div class="card-head">
+            <h2>My appointments</h2>
+        </div>
+        {% if appointments %}
+        <ul class="appt-list">
+            {% for a in appointments %}
+            <li class="appt reveal" style="--d: {{ 320 + loop.index0 * 50 }}ms">
+                <div class="appt-date">
+                    <span>{{ a.date }}</span>
+                    <small>{{ a.time }}</small>
+                </div>
+                <div class="appt-body">
+                    <p>{{ a.reason }}</p>
+                    <div class="tags">
+                        {% if a.department %}<span class="tag">{{ a.department }}</span>{% endif %}
+                        {% if a.year_level %}<span class="tag">{{ a.year_level }}</span>{% endif %}
+                    </div>
+                    {% if a.status in ['Pending', 'Approved'] %}
+                    <div class="actions" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                        <a href="{{ url_for('edit_appointment', appointment_id=a.id) }}" class="btn ghost sm">Edit</a>
+                        <form method="POST" action="{{ url_for('cancel_appointment', appointment_id=a.id) }}"
+                            data-confirm="Delete this appointment? This cannot be undone." style="margin:0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn danger-outline sm">Delete</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+                <span class="badge {{ a.status | lower }}">{{ a.status }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty">
+            <p><strong>No appointments yet</strong></p>
+            <p class="muted">Book your first session with a counselor.</p>
+            <a href="{{ url_for('book_appointment') }}" class="btn primary">Book appointment</a>
+        </div>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

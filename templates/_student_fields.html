@@ -1,0 +1,26 @@
+<div class="field">
+    <label for="contact_number">Contact number</label>
+    <input type="tel" name="contact_number" id="contact_number" placeholder="e.g. 0917 123 4567"
+        value="{{ form.get('contact_number') or '' }}" required inputmode="tel" autocomplete="tel"
+        pattern="\+?[0-9][0-9\s\-]{6,15}">
+</div>
+<div class="field-row">
+    <div class="field">
+        <label for="year_level">Year level</label>
+        <select name="year_level" id="year_level" required>
+            <option value="" disabled {{ 'selected' if not form.get('year_level') }}>Select year level</option>
+            {% for level in year_levels %}
+            <option value="{{ level }}" {{ 'selected' if form.get('year_level') == level }}>{{ level }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="field">
+        <label for="department">Department</label>
+        <select name="department" id="department" required>
+            <option value="" disabled {{ 'selected' if not form.get('department') }}>Select department</option>
+            {% for dept in departments %}
+            <option value="{{ dept }}" {{ 'selected' if form.get('department') == dept }}>{{ dept }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>

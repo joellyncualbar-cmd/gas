@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Appointment requests{% endblock %}
+
+{% block content %}
+<main class="page">
+    <header class="page-head reveal">
+        <p class="eyebrow">Counselor dashboard</p>
+        <h1>Appointment requests</h1>
+        <p class="muted">Review student details and approve or reject requests.</p>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+        <div class="stat reveal" style="--d: 60ms"><span class="stat-label">Total</span><strong data-count="{{ appointments|length }}">0</strong></div>
+        <div class="stat pending reveal" style="--d: 120ms"><span class="stat-label">Pending</span><strong data-count="{{ counts.Pending }}">0</strong></div>
+        <div class="stat approved reveal" style="--d: 180ms"><span class="stat-label">Approved</span><strong data-count="{{ counts.Approved }}">0</strong></div>
+        <div class="stat rejected reveal" style="--d: 240ms"><span class="stat-label">Rejected</span><strong data-count="{{ counts.Rejected }}">0</strong></div>
+    </section>
+
+    <section class="card reveal" style="--d: 300ms">
+        <div class="card-head"><h2>All requests</h2></div>
+        {% with show_actions = True, show_reschedule = True %}{% include "_appointments_table.html" %}{% endwith %}
+    </section>
+</main>
+{% endblock %}

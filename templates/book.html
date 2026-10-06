@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Book an appointment{% endblock %}
+
+{% block content %}
+<main class="page narrow">
+    <header class="page-head reveal">
+        <p class="eyebrow">New request</p>
+        <h1>Book an appointment</h1>
+        <p class="muted">Choose a schedule and tell us a bit about yourself. A counselor will review your request.</p>
+    </header>
+
+    <form method="POST" class="card form reveal" style="--d: 100ms" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <fieldset>
+            <legend>Student information</legend>
+            {% include "_student_fields.html" %}
+            {% if lock_year or lock_department %}
+            <p class="muted"><small>Your year level and department come from your account and can&apos;t be changed here.</small></p>
+            {% endif %}
+        </fieldset>
+
+        <fieldset>
+            <legend>Schedule</legend>
+            <div class="field-row">
+                <div class="field">
+                    <label for="date">Date</label>
+                    <input type="date" name="date" id="date" value="{{ form.get('date') or '' }}" required data-min-today>
+                </div>
+                <div class="field">
+                    <label for="time">Time</label>
+                    <input type="time" name="time" id="time" value="{{ form.get('time') or '' }}" min="08:00" max="17:00" required>
+                </div>
+            </div>
+            <div class="field">
+                <label for="reason">Reason for appointment</label>
+                <textarea name="reason" id="reason" rows="4" placeholder="Briefly describe what you'd like to talk about" required>{{ form.get('reason') or '' }}</textarea>
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <a href="{{ url_for('student_dashboard') }}" class="btn ghost">Cancel</a>
+            <button type="submit" class="btn primary">Submit request</button>
+        </div>
+    </form>
+</main>
+
+<script>
+(function () {
+    var locks = {
+        year_level: {{ 'true' if lock_year else 'false' }},
+        department: {{ 'true' if lock_department else 'false' }}
+    };
+    Object.keys(locks).forEach(function (name) {
+        if (!locks[name]) return;
+        var el = document.querySelector('[name="' + name + '"]');
+        if (el) {
+            el.disabled = true;
+            el.title = 'Set from your account. This cannot be changed here.';
+        }
+    });
+})();
+</script>
+{% endblock %}

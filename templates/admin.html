@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+
+{% block content %}
+<main class="page">
+    <header class="page-head reveal">
+        <p class="eyebrow">Administrator</p>
+        <h1>System overview</h1>
+        <p class="muted">Manage users and monitor all guidance appointments.</p>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+        <div class="stat reveal" style="--d: 60ms"><span class="stat-label">Users</span><strong
+                data-count="{{ total_users }}">0</strong></div>
+        <div class="stat reveal" style="--d: 120ms"><span class="stat-label">Appointments</span><strong
+                data-count="{{ total_appointments }}">0</strong></div>
+        <div class="stat pending reveal" style="--d: 180ms"><span class="stat-label">Pending</span><strong
+                data-count="{{ pending }}">0</strong></div>
+        <div class="stat approved reveal" style="--d: 240ms"><span class="stat-label">Approved</span><strong
+                data-count="{{ approved }}">0</strong></div>
+    </section>
+
+    <section class="card reveal" style="--d: 260ms">
+        <div class="card-head">
+            <h2>View options</h2>
+        </div>
+        <form method="GET" action="{{ url_for('admin_dashboard') }}" class="form">
+            <div class="field-row">
+                <div class="field">
+                    <label for="year">Year level</label>
+                    <select name="year" id="year" onchange="this.form.submit()">
+                        <option value="">All year levels</option>
+                        {% for y in year_levels %}
+                        <option value="{{ y }}" {% if y==selected_year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="order">Sort appointments by</label>
+                    <select name="order" id="order" onchange="this.form.submit()">
+                        <option value="booked" {% if selected_order=='booked' %}selected{% endif %}>Booking order (first
+                            to book on top)</option>
+                        <option value="date" {% if selected_order=='date' %}selected{% endif %}>Appointment date
+                        </option>
+                        <option value="year" {% if selected_order=='year' %}selected{% endif %}>Year level</option>
+                    </select>
+                </div>
+            </div>
+            <noscript><button type="submit" class="btn primary">Apply</button></noscript>
+            {% if selected_year or selected_order != 'booked' %}
+            <p><a href="{{ url_for('admin_dashboard') }}" class="link">Reset view</a></p>
+            {% endif %}
+        </form>
+    </section>
+
+    <section class="card reveal" style="--d: 280ms">
+        <div class="card-head">
+            <h2>All appointments{% if selected_year %} &middot; {{ selected_year }}{% endif %}</h2>
+        </div>
+        {% with show_actions = False, show_reschedule = True %}{% include "_appointments_table.html" %}{% endwith %}
+    </section>
+
+    <div class="grid-2">
+        <section class="card reveal" style="--d: 320ms">
+            <div class="card-head">
+                <h2>Add user</h2>
+            </div>
+            <form method="POST" action="{{ url_for('add_user') }}" class="form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="new_name">Full name</label>
+                    <input type="text" name="name" id="new_name" required>
+                </div>
+                <div class="field">
+                    <label for="new_username">Username</label>
+                    <input type="text" name="username" id="new_username" required autocomplete="off">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="new_password">Password</label>
+                        <input type="password" name="password" id="new_password" required minlength="6"
+                            autocomplete="new-password">
+                    </div>
+                    <div class="field">
+                        <label for="new_role">Role</label>
+                        <select name="role" id="new_role">
+                            <option value="student">Student</option>
+                            <option value="counselor">Counselor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn primary block">Add user</button>
+            </form>
+        </section>
+
+        <section class="card reveal" style="--d: 360ms">
+            <div class="card-head">
+                <h2>Users{% if selected_year %} &middot; {{ selected_year }}{% endif %}</h2>
+            </div>
+            <p class="muted"><small>Sorted by year level, Grade 11 first. Staff accounts are listed last.</small></p>
+            <div class="table-wrap">
+                <table class="table compact">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Contact</th>
+                            <th scope="col">Year &amp; Dept</th>
+                            <th scope="col"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr class="row-in" style="--d: {{ loop.index0 * 30 }}ms">
+                            <td data-label="Name">
+                                <div class="stack"><strong>{{ u.name }}</strong><small class="muted">@{{ u.username
+                                        }}</small></div>
+                            </td>
+                            <td data-label="Role"><span class="badge role-{{ u.role }}">{{ u.role | capitalize }}</span>
+                            </td>
+                            <td data-label="Contact">{{ u.contact_number or '—' }}</td>
+                            <td data-label="Year & Dept">
+                                <div class="stack"><span>{{ u.year_level or '—' }}</span><small class="muted">{{
+                                        u.department or '' }}</small></div>
+                            </td>
+                            <td data-label="Actions">
+                                {% if u.id != session.get('user_id') %}
+                                <form method="POST" action="{{ url_for('delete_user', user_id=u.id) }}"
+                                    data-confirm="Delete {{ u.name }}? Their appointments will also be removed.">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn danger-outline sm">Delete</button>
+                                </form>
+                                {% else %}
+                                <span class="muted">You</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="muted">No users match this year level.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

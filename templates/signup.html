@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set hide_nav = True %}
+{% block title %}Create account{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+
+{% block content %}
+<main class="auth-shell">
+    <section class="auth-hero reveal">
+        <div class="blob blob-1" aria-hidden="true"></div>
+        <div class="blob blob-2" aria-hidden="true"></div>
+        <span class="brand-mark lg" aria-hidden="true">G</span>
+        <p class="eyebrow light">CKCM Guidance Office</p>
+        <h1>Create your<br>student<br>account</h1>
+        <p class="hero-quote">A few details help our counselors reach and support you better.</p>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card wide reveal" style="--d: 120ms">
+            <h2>Sign up</h2>
+            <p class="muted">Fill up the form below to get started.</p>
+
+            <form method="POST" class="form" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="name">Full name</label>
+                    <input type="text" name="name" id="name" placeholder="Juan Dela Cruz" value="{{ form.get('name') or '' }}" required autocomplete="name">
+                </div>
+                {% include "_student_fields.html" %}
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" placeholder="Choose a username" value="{{ form.get('username') or '' }}" required autocomplete="username">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <div class="input-wrap">
+                            <input type="password" name="password" id="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+                            <button type="button" class="eye" data-toggle-password="password" aria-label="Show password">Show</button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="confirm_password">Confirm password</label>
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-enter password" required autocomplete="new-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn primary block">Create account</button>
+            </form>
+
+            <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+        </div>
+    </section>
+</main>
+{% endblock %}

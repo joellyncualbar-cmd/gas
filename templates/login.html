@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set hide_nav = True %}
+{% block title %}Log in{% endblock %}
+{% block body_class %}auth-body{% endblock %}
+
+{% block content %}
+<main class="auth-shell">
+    <section class="auth-hero reveal">
+        <div class="blob blob-1" aria-hidden="true"></div>
+        <div class="blob blob-2" aria-hidden="true"></div>
+        <span class="brand-mark lg" aria-hidden="true">G</span>
+        <p class="eyebrow light">CKCM Guidance Office</p>
+        <h1>Guidance<br>Appointment<br>System</h1>
+        <p class="hero-quote">{{ '"Your well-being matters. We\'re here to guide you."' }}</p>
+        <ul class="hero-points">
+            <li>Book sessions in under a minute</li>
+            <li>Track your request status in real time</li>
+            <li>Private and confidential</li>
+        </ul>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card reveal" style="--d: 120ms">
+            <h2>Welcome back</h2>
+            <p class="muted">Log in to continue to your dashboard.</p>
+
+            <form method="POST" class="form" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <input type="password" name="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="eye" data-toggle-password="password" aria-label="Show password">Show</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn primary block">Log in</button>
+            </form>
+
+            <p class="auth-switch">New student? <a href="{{ url_for('signup') }}">Create an account</a></p>
+        </div>
+    </section>
+</main>
+{% endblock %}
