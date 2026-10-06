@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <div class="brand">
+            <span class="brand-logo">G</span>
+            Guidance Office
+        </div>
+
+        <div class="nav-right">
+
+            <span>
+                {{ session["name"] }}
+            </span>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="welcome">
+
+            <h1>Admin Dashboard</h1>
+
+            <p>
+                Manage the Guidance Appointment System.
+            </p>
+
+        </div>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% for category, message in messages %}
+
+        <div class="alert {{ category }}">
+            {{ message }}
+        </div>
+
+        {% endfor %}
+
+        {% endwith %}
+
+
+        <!-- STATISTICS -->
+
+        <div class="stats">
+
+            <div class="stat-card">
+
+                <h3>Total Users</h3>
+
+                <strong>
+                    {{ total_users }}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>Total Appointments</h3>
+
+                <strong>
+                    {{ total_appointments }}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>Pending</h3>
+
+                <strong>
+                    {{ pending }}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>Approved</h3>
+
+                <strong>
+                    {{ approved }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ADD USER -->
+
+        <div class="dashboard-card">
+
+            <h2>Add New User</h2>
+
+            <form method="POST" action="{{ url_for('add_user') }}" class="user-form">
+
+                <input type="text" name="name" placeholder="Full name" required>
+
+                <input type="text" name="username" placeholder="Username" required>
+
+                <input type="password" name="password" placeholder="Password" required>
+
+                <select name="role" required>
+
+                    <option value="student">
+                        Student
+                    </option>
+
+                    <option value="counselor">
+                        Counselor
+                    </option>
+
+                    <option value="admin">
+                        Admin
+                    </option>
+
+                </select>
+
+                <button type="submit" class="btn primary">
+                    Add User
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- USERS -->
+
+        <div class="dashboard-card">
+
+            <h2>System Users</h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for user in users %}
+
+                        <tr>
+
+                            <td>
+                                {{ user["id"] }}
+                            </td>
+
+                            <td>
+                                {{ user["name"] }}
+                            </td>
+
+                            <td>
+                                {{ user["username"] }}
+                            </td>
+
+                            <td>
+                                {{ user["role"] }}
+                            </td>
+
+                            <td>
+
+                                {% if user["id"] != session["user_id"] %}
+
+                                <a href="{{ url_for(
+                                    'delete_user',
+                                    user_id=user['id']
+                                ) }}" class="action reject" onclick="return confirm(
+                                    'Delete this user?'
+                                )">
+                                    Delete
+                                </a>
+
+                                {% else %}
+
+                                <span class="completed">
+                                    Current User
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- APPOINTMENTS -->
+
+        <div class="dashboard-card">
+
+            <h2>All Appointments</h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for appointment in appointments %}
+
+                        <tr>
+
+                            <td>
+                                {{ appointment["student_name"] }}
+                            </td>
+
+                            <td>
+                                {{ appointment["date"] }}
+                            </td>
+
+                            <td>
+                                {{ appointment["time"] }}
+                            </td>
+
+                            <td>
+                                {{ appointment["reason"] }}
+                            </td>
+
+                            <td>
+
+                                <span class="status
+                                {{ appointment['status']|lower }}">
+
+                                    {{ appointment["status"] }}
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
