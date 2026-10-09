@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Offline{% endblock %}
+{% block content %}
+<main style="min-height:70vh;display:grid;place-items:center;text-align:center;padding:24px">
+  <div>
+    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" width="96" height="96" alt="" style="border-radius:50%">
+    <h1>You're offline</h1>
+    <p>Check your internet connection, then try again.</p>
+    <button type="button" class="btn" onclick="location.reload()">Retry</button>
+  </div>
+</main>
+{% endblock %}

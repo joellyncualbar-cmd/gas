@@ -5,7 +5,7 @@ import sqlite3
 from datetime import date as date_cls, datetime, timedelta, timezone
 from functools import wraps
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -881,6 +881,25 @@ def logout():
 @app.route("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.route("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(app.static_folder, "manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@app.route("/sw.js")
+def service_worker():
+    # Served from the site root so the worker can control the whole app.
+    response = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
+
+
+@app.route("/offline")
+def offline():
+    return render_template("offline.html", hide_nav=True)
 
 
 @app.after_request
